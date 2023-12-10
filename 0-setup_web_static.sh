@@ -7,6 +7,7 @@ then
     true
 else
     sudo apt-get -y install nginx
+    sudo service nginx start
 fi
 test -e /data/
 if (($? == 1))
@@ -43,6 +44,6 @@ else
     sudo ln -s /data/web_static/releases/test/ /data/web_static/current
 fi
 sudo chown -R ubuntu:ubuntu /data/
-hbnb_static="\\\n\\tserver{\\n\\t\\tlocation /hbnb_static/{\\n\\t\\t\\talias /data/web_static/current/;\\n\\t\\t}\\n\\t}"
-sudo sed -i "64i $hbnb_static" /etc/nginx/nginx.conf
+hbnb_static="\\\n\\tlocation /hbnb_static/ {\\n\\t\\talias /data/web_static/current/;\\n\\t}"
+sudo sed -i "33i $hbnb_static" /etc/nginx/sites-available/default
 sudo service nginx restart
