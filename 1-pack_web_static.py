@@ -16,8 +16,8 @@ def do_pack():
     date = datetime.now()
     date = date.strftime("%Y%B%d%H%M%S")
     archive_path = "./versions/web_static_{}.tgz".format(date)
-    if not os.path.exists("./versions"):
-        local("mkdir -p ./versions")
+    if not os.path.exists("./versions/"):
+        os.mkdir("./versions/")
     cmd = local("tar -cvzf {} ./web_static/".format(archive_path))
 
     if cmd.succeeded:
