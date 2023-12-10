@@ -18,7 +18,7 @@ def do_pack():
     archive_path = "./versions/web_static_{}.tgz".format(date)
     if not os.path.exists("./versions/"):
         os.mkdir("./versions/")
-    cmd = local("tar -cvf {} ./web_static/".format(archive_path))
+    cmd = local("tar -cvzf {} ./web_static/".format(archive_path))
 
     if cmd.succeeded:
         return archive_path
