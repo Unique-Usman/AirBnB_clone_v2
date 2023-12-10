@@ -15,10 +15,10 @@ def do_pack():
     """generates a .tgz archive from the contents of a file"""
     date = datetime.now()
     date = date.strftime("%Y%B%d%H%M%S")
-    archive_path = "versions/web_static_{}.tgz".format(date)
-    if not os.path.exists("versions"):
-        local("mkdir -p versions")
-    cmd = local("tar -cvzf {} web_static/".format(archive_path))
+    archive_path = "./versions/web_static_{}.tgz".format(date)
+    if not os.path.exists("./versions"):
+        local("mkdir -p ./versions")
+    cmd = local("tar -cvzf {} ./web_static/".format(archive_path))
 
     if cmd.succeeded:
         return archive_path
