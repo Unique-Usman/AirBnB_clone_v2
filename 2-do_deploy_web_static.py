@@ -6,7 +6,7 @@ that distributes an archive to your web servers, using the function do_deploy
 from fabric.api import *
 import os
 
-env.hosts = ['100.25.15.14']
+env.hosts = ['100.25.15.14', '34.232.78.53']
 env.user = "ubuntu"
 
 
@@ -18,11 +18,13 @@ def do_deploy(archive_path):
         put(archive_path, "/tmp/")
         archive_filename = archive_path.split('/')[-1]
         uncompressed_filename = archive_filename[:-4]
+        run("mkdir -p /data/web_static/releases/{}"
+            .format(uncompressed_filename))
         run("tar -xvzf  /tmp/{} -C /data/web_static/releases/{}"
             .format(archive_filename, uncompressed_filename))
         run("sudo rm /tmp/{}".format(archive_filename))
         run("sudo rm -r /data/web_static/current")
-        run("ln -s /data/web_static/current /data/web_static/releases/{}"
+        run("ln -s /data/web_static/releases/{} /data/web_static/current"
             .format(uncompressed_filename))
         return True
     except Exception:
