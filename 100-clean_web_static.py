@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """
-Fabric script (based on the file 2-do_deploy_web_static.py) that creates
-and distributes an archive to your web servers, using the function deploy
+Fabric script (based on the file 3-deploy_web_static.py)
+that deletes out-of-date archives, using the function do_clean
 """
-from fabric.api import *
+from fabric.api import local, env, put, run
 from time import strftime
 import os.path
 env.hosts = ['100.25.15.14', '34.232.78.53']
@@ -11,7 +11,7 @@ env.user = "ubuntu"
 
 
 def do_pack():
-    """generate .tgz archive of web_static folder"""
+    """generate .tgz archive of web_static/ folder"""
     timenow = strftime("%Y%M%d%H%M%S")
     try:
         local("mkdir -p versions")
@@ -52,3 +52,14 @@ def deploy():
         return False
     success = do_deploy(archive_path)
     return success
+
+
+def do_clean(number=0):
+    if number == 0:
+        number = 1
+    with cd.local('./versions'):
+        local("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
+            xargs -d '\n' rm".format(1 + number))
+    with cd('/data/web_static/releases/'):
+        run("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
+            xargs -d '\n' rm".format(1 + number))
