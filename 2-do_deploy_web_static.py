@@ -24,7 +24,7 @@ def do_deploy(archive_path):
             .format(archive_filename, uncompressed_filename))
         run("sudo rm /tmp/{}".format(archive_filename))
         run("sudo rm -r /data/web_static/current")
-        run("ln -s /data/web_static/releases/{} /data/web_static/current"
+        run("ln -s /data/web_static/releases/{}/web_static /data/web_static/current"
             .format(uncompressed_filename))
         return True
     except Exception:
