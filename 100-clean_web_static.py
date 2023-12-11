@@ -58,6 +58,10 @@ def deploy():
 
 
 def do_clean(number=0):
+    """
+    deletes out-of-date archives and leave only the most
+    recent base on the number specified
+    """
     if number == 0:
         number = 1
     with cd.local('./versions'):
