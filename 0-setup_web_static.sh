@@ -1,49 +1,36 @@
 #!/usr/bin/env bash
-#  Bash script that sets up your web servers for the deployment of web_static
+# install nginx on a server and set it up with html
 
-sudo apt-get -y update
-if command -v nginx > /dev/null 2>&1 
-then
-    true
+sudo apt-get update
+
+if command -v nginx > /dev/null 2>&1; then
+  echo "Nginx is already installed."
 else
-    sudo apt-get -y install nginx
-    sudo service nginx start
+  # Install Nginx
+  sudo apt-get -y install nginx
 fi
-test -e /data/
-if (($? == 1))
-then
-    sudo mkdir /data/
-fi
-test -e /data/web_static/
-if (($? == 1))
-then
-    sudo mkdir /data/web_static/
-fi
-test -e /data/web_static/releases/
-if (($? == 1))
-then
-    sudo mkdir /data/web_static/releases/
-fi
-test -e /data/web_static/shared/
-if (($? == 1))
-then
-    sudo mkdir /data/web_static/shared/
-fi
-test -e /data/web_static/releases/test/
-if (($? == 1))
-then
-    sudo mkdir /data/web_static/releases/test/
-fi
+
+sudo mkdir -p /data/web_static/releases/
+sudo mkdir -p /data/web_static/shared/
+sudo mkdir -p /data/web_static/releases/test/
 echo "Web Static" | sudo tee /data/web_static/releases/test/index.html
-test -L /data/web_static/current
-if (($? == 1))
-then
-    sudo ln -s /data/web_static/releases/test/ /data/web_static/current
-else
-    sudo rm /data/web_static/current
-    sudo ln -s /data/web_static/releases/test/ /data/web_static/current
+
+target_folder="/data/web_static/releases/test/"
+symbolic_link="/data/web_static/current"
+
+# Remove existing symbolic link if it exists
+if [[ -L "$symbolic_link" ]]; then
+  rm "$symbolic_link"
+  echo "Existing symbolic link removed."
 fi
-sudo chown -R ubuntu:ubuntu /data/
+
+# Create a new symbolic link
+ln -s "$target_folder" "$symbolic_link"
+echo "Symbolic link created to $target_folder."
+
+sudo chown -R ubuntu:ubuntu /data/ 
+
+# Update Nginx configuration
 hbnb_static="\\\n\\tlocation /hbnb_static/ {\\n\\t\\talias /data/web_static/current/;\\n\\t}"
 sudo sed -i "33i $hbnb_static" /etc/nginx/sites-available/default
 sudo service nginx restart

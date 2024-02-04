@@ -1,91 +1,52 @@
-# Configures a web server for deployment of web_static.
+# install_nginx.pp
 
-# Nginx configuration file
-$nginx_conf = "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By ${hostname};
-    root   /var/www/html;
-    index  index.html index.htm;
+# Update package list
+exec { 'apt-update':
+  command => '/usr/bin/apt-get update',
+  path    => '/usr/bin',
+}
 
-    location /hbnb_static {
-        alias /data/web_static/current;
-        index index.html index.htm;
-    }
-
-    location /redirect_me {
-        return 301 http://cuberule.com/;
-    }
-
-    error_page 404 /404.html;
-    location /404 {
-      root /var/www/html;
-      internal;
-    }
-}"
-
+# Install Nginx if not already installed
 package { 'nginx':
-  ensure   => 'present',
-  provider => 'apt'
-} ->
+  ensure => installed,
+}
 
-file { '/data':
-  ensure  => 'directory'
-} ->
+# Create directory structure
+file { ['/data/web_static/releases/', '/data/web_static/shared/', '/data/web_static/releases/test/']:
+  ensure => directory,
+}
 
-file { '/data/web_static':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/releases':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/releases/test':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/shared':
-  ensure => 'directory'
-} ->
-
+# Create a test HTML file
 file { '/data/web_static/releases/test/index.html':
-  ensure  => 'present',
-  content => "Holberton School Puppet\n"
-} ->
+  ensure  => present,
+  content => 'Web Static',
+}
 
+# Set up symbolic link
 file { '/data/web_static/current':
-  ensure => 'link',
-  target => '/data/web_static/releases/test'
-} ->
-
-exec { 'chown -R ubuntu:ubuntu /data/':
-  path => '/usr/bin/:/usr/local/bin/:/bin/'
+  ensure => link,
+  target => '/data/web_static/releases/test/',
+  force  => true,
 }
 
-file { '/var/www':
-  ensure => 'directory'
-} ->
-
-file { '/var/www/html':
-  ensure => 'directory'
-} ->
-
-file { '/var/www/html/index.html':
-  ensure  => 'present',
-  content => "Holberton School Nginx\n"
-} ->
-
-file { '/var/www/html/404.html':
-  ensure  => 'present',
-  content => "Ceci n'est pas une page\n"
-} ->
-
-file { '/etc/nginx/sites-available/default':
-  ensure  => 'present',
-  content => $nginx_conf
-} ->
-
-exec { 'nginx restart':
-  path => '/etc/init.d/'
+# Change ownership of directories
+exec { 'chown-data-directory':
+  command => 'chown -R ubuntu:ubuntu /data/',
 }
+
+# Update Nginx configuration
+$nginx_config_content = "\n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}"
+file_line { 'hbnb_static_config':
+  path   => '/etc/nginx/sites-available/default',
+  after  => 'listen 80 default_server;',
+  line   => 'rewrite ^/redirect_me https://www.github.com/besthor permanent;',
+  notify => Service['nginx'],
+}
+
+# Restart Nginx
+service { 'nginx':
+  ensure    => running,
+  enable    => true,
+  subscribe => File_line['hbnb_static_config'],
+}
+
