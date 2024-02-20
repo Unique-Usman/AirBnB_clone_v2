@@ -71,6 +71,7 @@ def deploy():
         return False
     return do_deploy(path_created)
 
+
 def do_clean(number=0):
     """Deletes out-of-date archives"""
     if int(number) < 0:

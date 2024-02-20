@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
 A python script that starts a flask applicaion
 And listening on 0.0.0.0 on port 5000
