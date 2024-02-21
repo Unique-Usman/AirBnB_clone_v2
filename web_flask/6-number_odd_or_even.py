@@ -6,6 +6,7 @@ And listening on 0.0.0.0 on port 5000
 from web_flask import app
 from flask import render_template, url_for
 
+
 @app.route("/", strict_slashes=False)
 def say_hello():
     """
